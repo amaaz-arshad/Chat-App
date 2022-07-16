@@ -86,6 +86,9 @@ const Home = () => {
       url = dlUrl;
     }
 
+    setText("");
+    setImg("");
+
     await addDoc(collection(db, "messages", id, "chat"), {
       text,
       from: user1,
@@ -102,9 +105,6 @@ const Home = () => {
       media: url || "",
       unread: true,
     });
-
-    setText("");
-    setImg("");
   };
 
   // console.log("chat:", chat);
