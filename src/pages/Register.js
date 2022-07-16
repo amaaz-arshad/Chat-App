@@ -140,7 +140,7 @@ const Register = () => {
         }}
       >
         <button className="btn" onClick={signInWithGoogle} disabled={loading}>
-          <span style={{ marginRight: "10px" }}>Sign Up with google</span>
+          <span style={{ marginRight: "10px" }}>Sign Up with Google</span>
           <FcGoogle size={20} />
         </button>
       </div>
