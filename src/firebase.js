@@ -17,6 +17,15 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
 };
 
+const actionCodeSettings = {
+  // URL you want to redirect back to. The domain (www.example.com) for this
+  // URL must be in the authorized domains list in the Firebase Console.
+  url: "https://chat-app-amber.vercel.app",
+  // This must be true.
+  handleCodeInApp: true,
+  // dynamicLinkDomain: "chat-app-amber.vercel.app",
+};
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -24,4 +33,4 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
-export { auth, db, storage, provider };
+export { auth, db, storage, provider, actionCodeSettings };

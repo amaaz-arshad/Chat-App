@@ -112,6 +112,10 @@ const Home = () => {
   return (
     <div className="home_container">
       <div className="users_container">
+        <div>
+          <input type="email" placeholder="Enter email" />
+          <button>Send Invite</button>
+        </div>
         {users.map((user) => (
           <User
             key={user.uid}

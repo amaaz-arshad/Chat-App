@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Img from "../image1.webp";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "../firebase";
-import { auth } from "../firebase";
 
 const User = ({ user1, user, selectUser, chat }) => {
   console.log("chat:", chat);
