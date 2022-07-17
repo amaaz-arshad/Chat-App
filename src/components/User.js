@@ -4,10 +4,10 @@ import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const User = ({ user1, user, selectUser, chat }) => {
-  console.log("chat:", chat);
-  console.log("user:", user);
-  console.log("user1:", user1);
-  console.log("selectUser:", selectUser);
+  // console.log("chat:", chat);
+  // console.log("user:", user);
+  // console.log("user1:", user1);
+  // console.log("selectUser:", selectUser);
 
   const user2 = user?.uid;
   const [data, setData] = useState("");

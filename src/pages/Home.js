@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db, auth, storage } from "../firebase";
+import { db, auth, storage, actionCodeSettings } from "../firebase";
 import {
   collection,
   query,
@@ -17,6 +17,7 @@ import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import User from "../components/User";
 import MessageForm from "../components/MessageForm";
 import Message from "../components/Message";
+import { sendSignInLinkToEmail } from "firebase/auth";
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -24,6 +25,7 @@ const Home = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState("");
   const [msgs, setMsgs] = useState([]);
+  const [email, setEmail] = useState("");
 
   const user1 = auth.currentUser.uid;
 
@@ -109,13 +111,38 @@ const Home = () => {
 
   // console.log("chat:", chat);
 
+  const sendInvite = (e) => {
+    e.preventDefault();
+    console.log(auth);
+    sendSignInLinkToEmail(auth, email, actionCodeSettings)
+      .then(() => {
+        // The link was successfully sent. Inform the user.
+        // Save the email locally so you don't need to ask the user for it again
+        // if they open the link on the same device.
+        window.localStorage.setItem("emailForSignIn", email);
+        // ...
+        console.log("invitation sent to", email);
+      })
+      .catch((error) => {
+        console.log(error.code, error.message);
+        // ...
+      });
+  };
+
   return (
     <div className="home_container">
       <div className="users_container">
         <div>
-          <input type="email" placeholder="Enter email" />
-          <button>Send Invite</button>
+          <form onSubmit={sendInvite}>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="submit">send email invite</button>
+          </form>
         </div>
+
         {users.map((user) => (
           <User
             key={user.uid}
