@@ -31,20 +31,28 @@ const Home = () => {
 
   const user1 = auth.currentUser.uid;
 
-  useEffect(() => {
+  useEffect(async () => {
     const usersRef = collection(db, "users");
-    // create query object
-    const q = query(usersRef, where("uid", "not-in", [user1]));
-    // execute query
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let users = [];
-      querySnapshot.forEach((doc) => {
-        users.push(doc.data());
+    const docData = await getDoc(doc(db, "users", auth.currentUser.uid));
+    console.log(docData.data());
+    let addedUsers = docData.data().addedUsers;
+    console.log("added users(from home page):", addedUsers);
+    if (addedUsers.length !== 0) {
+      const q = query(usersRef, where("email", "in", addedUsers));
+      // const q = query(usersRef, where("uid", "not-in", [user1]));
+      // execute query
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let users = [];
+        querySnapshot.forEach((doc) => {
+          users.push(doc.data());
+        });
+        console.log("users:", users);
+        setUsers(users);
       });
-      console.log("users:", users);
-      setUsers(users);
-    });
-    return () => unsub();
+      return () => unsub();
+    } else {
+      setUsers([]);
+    }
   }, []);
 
   const selectUser = async (user) => {
@@ -121,31 +129,34 @@ const Home = () => {
       console.log(auth);
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
 
-      let uniqueid = auth.currentUser.email + email;
-      await setDoc(doc(db, "addedUsers", uniqueid), {
-        invite_from_uid: auth.currentUser.uid,
-        invite_from_email: auth.currentUser.email,
-        invite_to_email: email,
+      const docData = await getDoc(doc(db, "users", auth.currentUser.uid));
+      console.log(docData.data());
+      let addedUsers = docData.data().addedUsers;
+      addedUsers.push(email);
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        addedUsers,
       });
-
       setInviteLoading(false);
       // The link was successfully sent. Inform the user.
       // Save the email locally so you don't need to ask the user for it again
       // if they open the link on the same device.
       window.localStorage.setItem("emailForSignIn", email);
+      window.localStorage.setItem("invitationEmail", auth.currentUser.email);
       // ...
       console.log("invitation sent to", email);
       alert("Chat invitation sent successfully");
       setEmail("");
     } catch (error) {
       console.log(error.code, error.message);
+      setInviteLoading(false);
+      alert(error.message);
     }
   };
 
   return (
     <div className="home_container">
       <div className="users_container">
-        {/* <div className="send-invite">
+        <div className="send-invite">
           <form onSubmit={sendInvite}>
             <input
               type="email"
@@ -162,7 +173,7 @@ const Home = () => {
               <button type="submit">Send Chat Invite</button>
             )}
           </form>
-        </div> */}
+        </div>
 
         <h3 className="available-chats">Available Chats</h3>
 

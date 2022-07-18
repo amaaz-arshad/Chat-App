@@ -6,7 +6,17 @@ import {
   signInWithEmailLink,
 } from "firebase/auth";
 import { auth, db, provider } from "../firebase";
-import { updateDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  updateDoc,
+  doc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+  where,
+  query,
+  collection,
+  onSnapshot,
+} from "firebase/firestore";
 import { Link, useHistory } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
@@ -36,12 +46,19 @@ const Login = () => {
         setData({ ...data, error: null, loading: true });
         try {
           let email = window.localStorage.getItem("emailForSignIn");
+          let invitation_email = window.localStorage.getItem("invitationEmail");
           if (!email) {
             // User opened the link on a different device. To prevent session fixation
             // attacks, ask the user to provide the associated email again. For example:
             email = window.prompt("Please provide your email for confirmation");
           }
           let name = window.prompt("Enter your name");
+          if (!invitation_email) {
+            invitation_email = window.prompt(
+              "Please provide the email of user who sent you invitation"
+            );
+          }
+
           // The client SDK will parse the code from the link for you.
 
           const result = await signInWithEmailLink(
@@ -52,17 +69,59 @@ const Login = () => {
 
           // Clear email from storage.
           window.localStorage.removeItem("emailForSignIn");
+          window.localStorage.removeItem("invitationEmail");
           // You can access the new user via result.user
           // Additional user info profile not available via:
           // result.additionalUserInfo.profile == null
           // You can check if the user is new or existing:
           // result.additionalUserInfo.isNewUser
+          // const docData = await getDoc(doc(db, "users", auth.currentUser.uid));
+          // console.log(docData.data());
+          // console.log("asd:",docData.data().addedUsers);
+          // let addedUsers = docData.data().addedUsers;
+          // addedUsers.push(email);
+          // await updateDoc(doc(db, "users", auth.currentUser.uid), {
+          //   addedUsers,
+          // });
+          // const q = query(
+          //   collection(db, "users"),
+          //   where("email", "==", invitation_email)
+          // );
+          // const docData = await getDoc(q);
+          // console.log(docData.data());
+          // console.log("added users:", docData.data().addedUsers);
+          // let addedUsers = docData.data().addedUsers;
+          // addedUsers.push(email);
+          // console.log("added users after pushed:", addedUsers);
+          // await updateDoc(q, {
+          //   addedUsers,
+          // });
+
+          let addedUsers = [];
+          // onSnapshot(q, (snapshot) => {
+          //   snapshot.docs.map((doc) => {
+          //     console.log("from snapshot:", doc.data());
+          //     console.log("asd:", doc.data().addedUsers);
+          //     addedUsers = doc.data().addedUsers;
+          //     addedUsers.push(email);
+          //     console.log("added users inside snapshot:", addedUsers);
+          //   });
+          // });
+          // console.log("added users outside snapshot:", addedUsers);
+          // await updateDoc(q, {
+          //   addedUsers,
+          // });
+
           console.log(result.user);
           console.log(result);
 
+          // addedUsers = [];
+
           if (
-            result.user.metadata.createdAt === result.user.metadata.lastLoginAt
+            result.user.metadata.creationTime ===
+            result.user.metadata.lastSignInTime
           ) {
+            addedUsers.push(invitation_email);
             await setDoc(doc(db, "users", result.user.uid), {
               uid: result.user.uid,
               name,
@@ -70,16 +129,20 @@ const Login = () => {
               photoURL: result.user.photoURL,
               createdAt: serverTimestamp(),
               isOnline: true,
+              addedUsers: [],
             });
           } else {
+            const docData = await getDoc(doc(db, "users", result.user.uid));
+            console.log(docData.data());
+            addedUsers = docData.data().addedUsers;
+            addedUsers.push(invitation_email);
             await updateDoc(doc(db, "users", result.user.uid), {
+              addedUsers,
               isOnline: true,
             });
           }
-
           setData({
-            email: "",
-            password: "",
+            ...data,
             error: null,
             loading: false,
           });
@@ -124,18 +187,29 @@ const Login = () => {
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      //console.log(result);
-      await setDoc(doc(db, "users", result.user.uid), {
-        uid: result.user.uid,
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-        createdAt: serverTimestamp(),
-        isOnline: true,
-      });
+      console.log(result);
+      if (
+        result.user.metadata.creationTime ===
+        result.user.metadata.lastSignInTime
+      ) {
+        console.log("set section executed");
+        await setDoc(doc(db, "users", result.user.uid), {
+          uid: result.user.uid,
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          isOnline: true,
+          addedUsers: [],
+        });
+      } else {
+        console.log("updated section executed");
+        await updateDoc(doc(db, "users", result.user.uid), {
+          isOnline: true,
+        });
+      }
       setData({
-        email: "",
-        password: "",
+        ...data,
         error: null,
         loading: false,
       });
