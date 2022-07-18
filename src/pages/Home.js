@@ -132,7 +132,7 @@ const Home = () => {
   return (
     <div className="home_container">
       <div className="users_container">
-        <div>
+        {/* <div>
           <form onSubmit={sendInvite}>
             <input
               type="email"
@@ -141,7 +141,7 @@ const Home = () => {
             />
             <button type="submit">send email invite</button>
           </form>
-        </div>
+        </div> */}
 
         {users.map((user) => (
           <User
