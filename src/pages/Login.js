@@ -23,76 +23,6 @@ const Login = () => {
 
   const { email, password, error, loading } = data;
 
-  useEffect(() => {
-    // Confirm the link is a sign-in with email link.
-    // const auth = getAuth();
-    const loginWithLink = async () => {
-      if (isSignInWithEmailLink(auth, window.location.href)) {
-        // Additional state parameters can also be passed via URL.
-        // This can be used to continue the user's intended action before triggering
-        // the sign-in operation.
-        // Get the email if available. This should be available if the user completes
-        // the flow on the same device where they started it.
-        setData({ ...data, error: null, loading: true });
-        try {
-          let email = window.localStorage.getItem("emailForSignIn");
-          if (!email) {
-            // User opened the link on a different device. To prevent session fixation
-            // attacks, ask the user to provide the associated email again. For example:
-            email = window.prompt("Please provide your email for confirmation");
-          }
-          let name = window.prompt("Enter your name");
-          // The client SDK will parse the code from the link for you.
-
-          const result = await signInWithEmailLink(
-            auth,
-            email,
-            window.location.href
-          );
-
-          // Clear email from storage.
-          window.localStorage.removeItem("emailForSignIn");
-          // You can access the new user via result.user
-          // Additional user info profile not available via:
-          // result.additionalUserInfo.profile == null
-          // You can check if the user is new or existing:
-          // result.additionalUserInfo.isNewUser
-          console.log(result.user);
-          console.log(result);
-
-          if (
-            result.user.metadata.createdAt === result.user.metadata.lastLoginAt
-          ) {
-            await setDoc(doc(db, "users", result.user.uid), {
-              uid: result.user.uid,
-              name,
-              email: result.user.email,
-              photoURL: result.user.photoURL,
-              createdAt: serverTimestamp(),
-              isOnline: true,
-            });
-          } else {
-            await updateDoc(doc(db, "users", result.user.uid), {
-              isOnline: true,
-            });
-          }
-
-          setData({
-            email: "",
-            password: "",
-            error: null,
-            loading: false,
-          });
-          history.replace("/");
-        } catch (err) {
-          console.log(err.message);
-          setData({ ...data, error: err.message, loading: false });
-        }
-      }
-    };
-    loginWithLink();
-  }, []);
-
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
@@ -124,18 +54,28 @@ const Login = () => {
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      //console.log(result);
-      await setDoc(doc(db, "users", result.user.uid), {
-        uid: result.user.uid,
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-        createdAt: serverTimestamp(),
-        isOnline: true,
-      });
+      console.log(result);
+      if (
+        result.user.metadata.creationTime ===
+        result.user.metadata.lastSignInTime
+      ) {
+        console.log("set section executed");
+        await setDoc(doc(db, "users", result.user.uid), {
+          uid: result.user.uid,
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          isOnline: true,
+        });
+      } else {
+        console.log("updated section executed");
+        await updateDoc(doc(db, "users", result.user.uid), {
+          isOnline: true,
+        });
+      }
       setData({
-        email: "",
-        password: "",
+        ...data,
         error: null,
         loading: false,
       });

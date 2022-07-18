@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, db, provider } from "../firebase";
-import { setDoc, doc, Timestamp, serverTimestamp } from "firebase/firestore";
+import {
+  setDoc,
+  doc,
+  Timestamp,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { Link, useHistory } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
@@ -60,19 +66,28 @@ const Register = () => {
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      //console.log(result);
-      await setDoc(doc(db, "users", result.user.uid), {
-        uid: result.user.uid,
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-        createdAt: serverTimestamp(),
-        isOnline: true,
-      });
+      console.log(result);
+      if (
+        result.user.metadata.creationTime ===
+        result.user.metadata.lastSignInTime
+      ) {
+        console.log("set section executed");
+        await setDoc(doc(db, "users", result.user.uid), {
+          uid: result.user.uid,
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          isOnline: true,
+        });
+      } else {
+        console.log("updated section executed");
+        await updateDoc(doc(db, "users", result.user.uid), {
+          isOnline: true,
+        });
+      }
       setData({
-        name: "",
-        email: "",
-        password: "",
+        ...data,
         error: null,
         loading: false,
       });

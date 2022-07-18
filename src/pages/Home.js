@@ -114,34 +114,6 @@ const Home = () => {
 
   // console.log("chat:", chat);
 
-  const sendInvite = async (e) => {
-    setInviteLoading(true);
-    e.preventDefault();
-    try {
-      console.log(auth);
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-
-      let uniqueid = auth.currentUser.email + email;
-      await setDoc(doc(db, "addedUsers", uniqueid), {
-        invite_from_uid: auth.currentUser.uid,
-        invite_from_email: auth.currentUser.email,
-        invite_to_email: email,
-      });
-
-      setInviteLoading(false);
-      // The link was successfully sent. Inform the user.
-      // Save the email locally so you don't need to ask the user for it again
-      // if they open the link on the same device.
-      window.localStorage.setItem("emailForSignIn", email);
-      // ...
-      console.log("invitation sent to", email);
-      alert("Chat invitation sent successfully");
-      setEmail("");
-    } catch (error) {
-      console.log(error.code, error.message);
-    }
-  };
-
   return (
     <div className="home_container">
       <div className="users_container">
