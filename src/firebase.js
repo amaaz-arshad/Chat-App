@@ -20,10 +20,11 @@ const firebaseConfig = {
 const actionCodeSettings = {
   // URL you want to redirect back to. The domain (www.example.com) for this
   // URL must be in the authorized domains list in the Firebase Console.
-  url: "https://chat-app-amber.vercel.app/login",
+  // url: "https://chat-app-amber.vercel.app/login",
+  url: "http://localhost:3000/login",
   // This must be true.
   handleCodeInApp: true,
-  // dynamicLinkDomain: "chat-app-amber.vercel.app",
+  // dynamicLinkDomain: "",
 };
 
 // Initialize Firebase

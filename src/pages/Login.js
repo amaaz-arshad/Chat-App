@@ -60,14 +60,23 @@ const Login = () => {
           console.log(result.user);
           console.log(result);
 
-          await setDoc(doc(db, "users", result.user.uid), {
-            uid: result.user.uid,
-            name,
-            email: result.user.email,
-            photoURL: result.user.photoURL,
-            createdAt: serverTimestamp(),
-            isOnline: true,
-          });
+          if (
+            result.user.metadata.createdAt === result.user.metadata.lastLoginAt
+          ) {
+            await setDoc(doc(db, "users", result.user.uid), {
+              uid: result.user.uid,
+              name,
+              email: result.user.email,
+              photoURL: result.user.photoURL,
+              createdAt: serverTimestamp(),
+              isOnline: true,
+            });
+          } else {
+            await updateDoc(doc(db, "users", result.user.uid), {
+              isOnline: true,
+            });
+          }
+
           setData({
             email: "",
             password: "",
@@ -96,7 +105,7 @@ const Login = () => {
     }
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-
+      console.log(result.user);
       await updateDoc(doc(db, "users", result.user.uid), {
         isOnline: true,
       });

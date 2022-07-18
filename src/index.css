@@ -36,3 +36,36 @@ code {
 .navlinks:hover {
   color: silver;
 }
+
+.send-invite {
+  padding: 20px;
+}
+
+.send-invite input {
+  width: 100%;
+  padding: 8px;
+  outline: none;
+  border: 1px solid var(--color-6);
+  border-radius: 5px;
+}
+
+.send-invite button {
+  width: 100%;
+  background-color: rgb(6, 149, 6);
+  color: white;
+  margin-top: 10px;
+  font-size: 14px;
+  padding: 8px;
+  border: 1px solid var(--color-6);
+  border-radius: 5px;
+}
+
+.send-invite button:hover {
+  background-color: rgb(5, 120, 5);
+  cursor: pointer;
+}
+
+.available-chats {
+  color: var(--color-4);
+  text-align: center;
+}

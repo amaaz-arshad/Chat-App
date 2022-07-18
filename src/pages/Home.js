@@ -18,6 +18,7 @@ import User from "../components/User";
 import MessageForm from "../components/MessageForm";
 import Message from "../components/Message";
 import { sendSignInLinkToEmail } from "firebase/auth";
+import { CircularProgress } from "@mui/material";
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -26,6 +27,7 @@ const Home = () => {
   const [img, setImg] = useState("");
   const [msgs, setMsgs] = useState([]);
   const [email, setEmail] = useState("");
+  const [inviteLoading, setInviteLoading] = useState(false);
 
   const user1 = auth.currentUser.uid;
 
@@ -39,6 +41,7 @@ const Home = () => {
       querySnapshot.forEach((doc) => {
         users.push(doc.data());
       });
+      console.log("users:", users);
       setUsers(users);
     });
     return () => unsub();
@@ -111,37 +114,57 @@ const Home = () => {
 
   // console.log("chat:", chat);
 
-  const sendInvite = (e) => {
+  const sendInvite = async (e) => {
+    setInviteLoading(true);
     e.preventDefault();
-    console.log(auth);
-    sendSignInLinkToEmail(auth, email, actionCodeSettings)
-      .then(() => {
-        // The link was successfully sent. Inform the user.
-        // Save the email locally so you don't need to ask the user for it again
-        // if they open the link on the same device.
-        window.localStorage.setItem("emailForSignIn", email);
-        // ...
-        console.log("invitation sent to", email);
-      })
-      .catch((error) => {
-        console.log(error.code, error.message);
-        // ...
+    try {
+      console.log(auth);
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+
+      let uniqueid = auth.currentUser.email + email;
+      await setDoc(doc(db, "addedUsers", uniqueid), {
+        invite_from_uid: auth.currentUser.uid,
+        invite_from_email: auth.currentUser.email,
+        invite_to_email: email,
       });
+
+      setInviteLoading(false);
+      // The link was successfully sent. Inform the user.
+      // Save the email locally so you don't need to ask the user for it again
+      // if they open the link on the same device.
+      window.localStorage.setItem("emailForSignIn", email);
+      // ...
+      console.log("invitation sent to", email);
+      alert("Chat invitation sent successfully");
+      setEmail("");
+    } catch (error) {
+      console.log(error.code, error.message);
+    }
   };
 
   return (
     <div className="home_container">
       <div className="users_container">
-        {/* <div>
+        {/* <div className="send-invite">
           <form onSubmit={sendInvite}>
             <input
               type="email"
+              placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <button type="submit">send email invite</button>
+            {inviteLoading ? (
+              <button type="submit" disabled>
+                <span style={{ marginRight: "10px" }}>Sending invite</span>
+                <CircularProgress color="inherit" size={13} />
+              </button>
+            ) : (
+              <button type="submit">Send Chat Invite</button>
+            )}
           </form>
         </div> */}
+
+        <h3 className="available-chats">Available Chats</h3>
 
         {users.map((user) => (
           <User
