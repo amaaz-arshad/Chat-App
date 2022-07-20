@@ -68,4 +68,5 @@ code {
 .available-chats {
   color: var(--color-4);
   text-align: center;
+  padding: 5px 0;
 }
