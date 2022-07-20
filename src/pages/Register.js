@@ -108,69 +108,76 @@ const Register = () => {
   };
 
   return (
-    <section style={{ paddingTop: "1px" }}>
-      <h3>Create An Account</h3>
-      <form
-        style={{ marginTop: "20px" }}
-        className="form"
-        onSubmit={handleSubmit}
-      >
-        <div className="input_container">
-          <label htmlFor="name">Name</label>
-          <input type="text" name="name" value={name} onChange={handleChange} />
-        </div>
-        <div className="input_container">
-          <label htmlFor="email">Email</label>
-          <input
-            type="text"
-            name="email"
-            value={email}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="input_container">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={handleChange}
-          />
-        </div>
-        {error ? <p className="error">{error}</p> : null}
-        <div className="btn_container">
-          <button className="btn" disabled={loading}>
-            {loading ? (
-              <>
-                <span style={{ marginRight: "10px" }}>Creating</span>
-                <CircularProgress color="inherit" size={15} />
-              </>
-            ) : (
-              "Register"
-            )}
-          </button>
-          <div style={{ marginTop: "5px" }}>
-            <Link className="gotoLink" to="/login">
-              Have an account already? Login!
-            </Link>
+    <div style={{ paddingLeft: "20px", paddingRight: "20px" }}>
+      <section style={{ paddingTop: "1px" }}>
+        <h3>Create An Account</h3>
+        <form
+          style={{ marginTop: "20px" }}
+          className="form"
+          onSubmit={handleSubmit}
+        >
+          <div className="input_container">
+            <label htmlFor="name">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={name}
+              onChange={handleChange}
+            />
           </div>
+          <div className="input_container">
+            <label htmlFor="email">Email</label>
+            <input
+              type="text"
+              name="email"
+              value={email}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="input_container">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={password}
+              onChange={handleChange}
+            />
+          </div>
+          {error ? <p className="error">{error}</p> : null}
+          <div className="btn_container">
+            <button className="btn" disabled={loading}>
+              {loading ? (
+                <>
+                  <span style={{ marginRight: "10px" }}>Creating</span>
+                  <CircularProgress color="inherit" size={15} />
+                </>
+              ) : (
+                "Register"
+              )}
+            </button>
+            <div style={{ marginTop: "5px" }}>
+              <Link className="gotoLink" to="/login">
+                Have an account already? Login!
+              </Link>
+            </div>
+          </div>
+        </form>
+        <div
+          className="btn_container"
+          style={{
+            paddingLeft: "20px",
+            paddingRight: "20px",
+            marginTop: "25px",
+            marginBottom: "15px",
+          }}
+        >
+          <button className="btn" onClick={signInWithGoogle} disabled={loading}>
+            <span style={{ marginRight: "10px" }}>Sign Up with Google</span>
+            <FcGoogle size={20} />
+          </button>
         </div>
-      </form>
-      <div
-        className="btn_container"
-        style={{
-          paddingLeft: "20px",
-          paddingRight: "20px",
-          marginTop: "25px",
-          marginBottom: "15px",
-        }}
-      >
-        <button className="btn" onClick={signInWithGoogle} disabled={loading}>
-          <span style={{ marginRight: "10px" }}>Sign Up with Google</span>
-          <FcGoogle size={20} />
-        </button>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 };
 
