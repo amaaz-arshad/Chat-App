@@ -67,6 +67,7 @@ const Login = () => {
           photoURL: result.user.photoURL,
           createdAt: serverTimestamp(),
           isOnline: true,
+          token: "",
         });
       } else {
         console.log("updated section executed");

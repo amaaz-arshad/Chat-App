@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
 import { auth, db, provider } from "../firebase";
 import {
   setDoc,
@@ -42,6 +46,10 @@ const Register = () => {
         password
       );
       console.log(result.user);
+
+      await updateProfile(auth.currentUser, {
+        displayName: name,
+      });
       await setDoc(doc(db, "users", result.user.uid), {
         uid: result.user.uid,
         name,
@@ -49,6 +57,7 @@ const Register = () => {
         photoURL: result.user.photoURL,
         createdAt: Timestamp.fromDate(new Date()),
         isOnline: true,
+        token: "",
       });
       setData({
         name: "",
@@ -79,6 +88,7 @@ const Register = () => {
           photoURL: result.user.photoURL,
           createdAt: serverTimestamp(),
           isOnline: true,
+          token: "",
         });
       } else {
         console.log("updated section executed");

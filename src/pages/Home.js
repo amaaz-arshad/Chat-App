@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db, auth, storage, actionCodeSettings } from "../firebase";
+import { db, auth, storage, actionCodeSettings, messaging } from "../firebase";
 import {
   collection,
   query,
@@ -19,6 +19,9 @@ import MessageForm from "../components/MessageForm";
 import Message from "../components/Message";
 import { sendSignInLinkToEmail } from "firebase/auth";
 import { CircularProgress } from "@mui/material";
+// import swDev from "../swDev";
+import { getToken } from "firebase/messaging";
+import { getMessaging, onMessage } from "firebase/messaging";
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -28,10 +31,54 @@ const Home = () => {
   const [msgs, setMsgs] = useState([]);
   const [email, setEmail] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [token, setToken] = useState("");
 
   const user1 = auth.currentUser.uid;
 
   useEffect(() => {
+    const messaging = getMessaging();
+    onMessage(messaging, (payload) => {
+      console.log("Message received. ", payload);
+      // ...
+    });
+    function requestPermission() {
+      console.log("Requesting permission...");
+      Notification.requestPermission().then((permission) => {
+        console.log(permission);
+        if (permission === "granted") {
+          getToken(messaging, {
+            vapidKey:
+              "BLZNfKDSTLQ32jw2Ohf9PcN2tbew1I5Uv9SWX9pUIKD67PFA51yXsWdeny5kHx5twO0JoVRy1GNVsHgFt0uUnQU",
+          })
+            .then((currentToken) => {
+              if (currentToken) {
+                console.log("token:", currentToken);
+                updateDoc(doc(db, "users", auth.currentUser.uid), {
+                  token: currentToken,
+                });
+                //setToken(currentToken);
+                // Send the token to your server and update the UI if necessary
+                // ...
+              } else {
+                // Show permission request UI
+                console.log(
+                  "No registration token available. Request permission to generate one."
+                );
+                // ...
+              }
+            })
+            .catch((err) => {
+              console.log("An error occurred while retrieving token. ", err);
+              // ...
+            });
+        }
+      });
+    }
+    requestPermission();
+  }, []);
+
+  useEffect(() => {
+    // swDev();
     const usersRef = collection(db, "users");
     // create query object
     const q = query(usersRef, where("uid", "not-in", [user1]));
@@ -75,6 +122,7 @@ const Home = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // console.log("chat:", chat);
 
     const user2 = chat.uid;
 
@@ -110,32 +158,40 @@ const Home = () => {
       media: url || "",
       unread: true,
     });
-  };
 
-  // console.log("chat:", chat);
+    let body = {
+      to: chat.token,
+      notification: {
+        title: `Message from ${auth.currentUser.displayName}`,
+        body: text,
+      },
+    };
+    console.log(body);
+
+    let options = {
+      method: "POST",
+      headers: new Headers({
+        Authorization:
+          "key=AAAAG-WmdaM:APA91bFs8ZvZg9vUQTZgC5N601T6PbwL4s0hfxdTWViQ0Wq6sdB0LV-UTuEYjFbPzL3AmP1Zxvqchq2NtfQgKcdzzFzD6vCuwoRi_aZpn5mjTbWpnOb69zhDg6zuxlxK_c1K_bgb3CPN",
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify(body),
+    };
+
+    fetch("https://fcm.googleapis.com/fcm/send", options)
+      .then((res) => {
+        console.log("SENT");
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log("Error:", err);
+      });
+  };
 
   return (
     <div className="home_container">
       <div className="users_container">
-        {/* <div className="send-invite">
-          <form onSubmit={sendInvite}>
-            <input
-              type="email"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {inviteLoading ? (
-              <button type="submit" disabled>
-                <span style={{ marginRight: "10px" }}>Sending invite</span>
-                <CircularProgress color="inherit" size={13} />
-              </button>
-            ) : (
-              <button type="submit">Send Chat Invite</button>
-            )}
-          </form>
-        </div> */}
-
         <h3 className="available-chats">Available Chats</h3>
 
         {users.map((user) => (
