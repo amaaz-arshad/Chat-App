@@ -13,7 +13,12 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
-import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import {
+  ref,
+  getDownloadURL,
+  uploadBytes,
+  uploadBytesResumable,
+} from "firebase/storage";
 import User from "../components/User";
 import MessageForm from "../components/MessageForm";
 import Message from "../components/Message";
@@ -28,12 +33,17 @@ const Home = () => {
   const [chat, setChat] = useState("");
   const [text, setText] = useState("");
   const [img, setImg] = useState("");
+  // const [fileName, setfileName] = useState("");
   const [msgs, setMsgs] = useState([]);
   const [email, setEmail] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [token, setToken] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [isMsgSending, setIsMsgSending] = useState(false);
+  const [isfileAttached, setIsfileAttached] = useState(false);
 
   const user1 = auth.currentUser.uid;
+  let fileName = "";
 
   useEffect(() => {
     const messaging = getMessaging();
@@ -124,23 +134,39 @@ const Home = () => {
     e.preventDefault();
     // console.log("chat:", chat);
 
+    setIsMsgSending(true);
     const user2 = chat.uid;
 
     const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
 
     let url;
-    if (img) {
-      const imgRef = ref(
-        storage,
-        `images/${new Date().getTime()} - ${img.name}`
-      );
-      const snap = await uploadBytes(imgRef, img);
-      const dlUrl = await getDownloadURL(ref(storage, snap.ref.fullPath));
-      url = dlUrl;
-    }
+    try {
+      if (img) {
+        console.log("file in home:", img);
+        fileName = img.name;
+        const imgRef = ref(
+          storage,
+          `images/${new Date().getTime()} - ${img.name}`
+        );
+        const snap = await uploadBytesResumable(imgRef, img);
+        // snap.on("state_changed", (snapshot) => {
+        //   const prog = Math.round(
+        //     (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        //   );
+        //   setProgress(prog);
+        // });
+        const dlUrl = await getDownloadURL(ref(storage, snap.ref.fullPath));
+        url = dlUrl;
+      }
 
-    setText("");
-    setImg("");
+      setText("");
+      setImg("");
+      setIsMsgSending(false);
+      setIsfileAttached(false);
+    } catch (error) {
+      console.log(error);
+      setIsMsgSending(false);
+    }
 
     await addDoc(collection(db, "messages", id, "chat"), {
       text,
@@ -148,6 +174,7 @@ const Home = () => {
       to: user2,
       createdAt: Timestamp.fromDate(new Date()),
       media: url || "",
+      fileName,
     });
 
     await setDoc(doc(db, "lastMsg", id), {
@@ -156,6 +183,7 @@ const Home = () => {
       to: user2,
       createdAt: Timestamp.fromDate(new Date()),
       media: url || "",
+      fileName,
       unread: true,
     });
 
@@ -164,6 +192,7 @@ const Home = () => {
       notification: {
         title: `Message from ${auth.currentUser.displayName}`,
         body: text,
+        icon: url,
       },
     };
     console.log(body);
@@ -210,6 +239,7 @@ const Home = () => {
             <div className="messages_user">
               <h3>{chat.name}</h3>
             </div>
+
             <div className="messages">
               {msgs.length
                 ? msgs.map((msg, i) => (
@@ -217,11 +247,16 @@ const Home = () => {
                   ))
                 : null}
             </div>
+            {isfileAttached && (
+              <div className="file-attach-msg">( file attached )</div>
+            )}
             <MessageForm
               handleSubmit={handleSubmit}
               text={text}
               setText={setText}
               setImg={setImg}
+              isMsgSending={isMsgSending}
+              setIsfileAttached={setIsfileAttached}
             />
           </>
         ) : (

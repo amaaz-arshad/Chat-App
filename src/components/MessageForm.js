@@ -1,10 +1,17 @@
 import React from "react";
 import Attachment from "./svg/Attachment";
 import { CgAttachment } from "react-icons/cg";
-
+import { CircularProgress } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 
-const MessageForm = ({ handleSubmit, text, setText, setImg }) => {
+const MessageForm = ({
+  handleSubmit,
+  text,
+  setText,
+  setImg,
+  isMsgSending,
+  setIsfileAttached,
+}) => {
   return (
     <form className="message_form" onSubmit={handleSubmit}>
       <label htmlFor="img">
@@ -27,10 +34,13 @@ const MessageForm = ({ handleSubmit, text, setText, setImg }) => {
         /> */}
       </label>
       <input
-        onChange={(e) => setImg(e.target.files[0])}
+        onChange={(e) => {
+          setImg(e.target.files[0]);
+          setIsfileAttached(true);
+        }}
         type="file"
         id="img"
-        accept="image/*"
+        // accept="image/*"
         style={{ display: "none" }}
       />
       <div>
@@ -42,7 +52,13 @@ const MessageForm = ({ handleSubmit, text, setText, setImg }) => {
         />
       </div>
       <div>
-        <button className="btn">Send</button>
+        {isMsgSending ? (
+          <button className="btn-loading" disabled>
+            <CircularProgress color="inherit" size={15} />
+          </button>
+        ) : (
+          <button className="btn">Send</button>
+        )}
       </div>
     </form>
   );

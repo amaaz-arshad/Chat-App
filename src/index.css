@@ -21,6 +21,8 @@ code {
   --color-4: grey;
   --color-5: #eb4034;
   --color-6: #333;
+  --color-7: #409cf3;
+  --color-8: rgb(84, 84, 84);
 }
 
 .gotoLink {
@@ -69,4 +71,24 @@ code {
   color: var(--color-4);
   text-align: center;
   padding: 5px 0;
+}
+
+.attachment-link {
+  color: white;
+  text-decoration: none;
+}
+
+.msg-me {
+  background-color: var(--color-7);
+}
+
+.msg-friend {
+  background-color: var(--color-8);
+}
+
+.file-attach-msg {
+  position: relative;
+  top: 16px;
+  left: 60px;
+  /* bottom: 30px; */
 }
