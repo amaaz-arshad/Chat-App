@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -17,6 +17,20 @@ const Navbar = () => {
     await signOut(auth);
     history.replace("/login");
   };
+
+  // useEffect(() => {
+  //   const timer = setTimeout(async () => {
+  //     console.log(timer);
+  //     // handleSignout();
+  //     await updateDoc(doc(db, "users", auth.currentUser.uid), {
+  //       isOnline: false,
+  //     });
+  //     await signOut(auth);
+  //     history.replace("/login");
+  //   }, 3600000);
+  //   return () => clearTimeout(timer);
+  // }, []);
+
   return (
     <nav>
       <h3>

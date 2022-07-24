@@ -11,6 +11,7 @@ import {
 import { getDoc, doc, updateDoc } from "firebase/firestore";
 import Delete from "../components/svg/Delete";
 import { useHistory } from "react-router-dom";
+import { signOut } from "firebase/auth";
 // import { ToastContainer, toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 
@@ -18,6 +19,38 @@ const Profile = () => {
   const [img, setImg] = useState("");
   const [user, setUser] = useState();
   const history = useHistory("");
+  const [tabHasFocus, setTabHasFocus] = useState(true);
+  let timer;
+
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("Tab has focus");
+      setTabHasFocus(true);
+      clearTimeout(timer);
+    };
+
+    const handleBlur = () => {
+      console.log("Tab lost focus");
+      setTabHasFocus(false);
+      timer = setTimeout(async () => {
+        // handleSignout();
+        console.log("Session expired. Logging out...");
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+          isOnline: false,
+        });
+        await signOut(auth);
+        history.replace("/login");
+      }, 3600000);
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, []);
 
   useEffect(() => {
     getDoc(doc(db, "users", auth.currentUser.uid)).then((docSnap) => {

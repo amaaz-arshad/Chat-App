@@ -22,11 +22,12 @@ import {
 import User from "../components/User";
 import MessageForm from "../components/MessageForm";
 import Message from "../components/Message";
-import { sendSignInLinkToEmail } from "firebase/auth";
+import { sendSignInLinkToEmail, signOut } from "firebase/auth";
 import { CircularProgress } from "@mui/material";
 // import swDev from "../swDev";
 import { getToken } from "firebase/messaging";
 import { getMessaging, onMessage } from "firebase/messaging";
+import { useHistory } from "react-router-dom";
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -41,9 +42,43 @@ const Home = () => {
   const [progress, setProgress] = useState(0);
   const [isMsgSending, setIsMsgSending] = useState(false);
   const [isfileAttached, setIsfileAttached] = useState(false);
+  const history = useHistory();
 
   const user1 = auth.currentUser.uid;
   let fileName = "";
+  let timer;
+
+  const [tabHasFocus, setTabHasFocus] = useState(true);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("Tab has focus");
+      setTabHasFocus(true);
+      clearTimeout(timer);
+    };
+
+    const handleBlur = () => {
+      console.log("Tab lost focus");
+      setTabHasFocus(false);
+      timer = setTimeout(async () => {
+        // handleSignout();
+        console.log("Session expired. Logging out...");
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+          isOnline: false,
+        });
+        await signOut(auth);
+        history.replace("/login");
+      }, 3600000);
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, []);
 
   useEffect(() => {
     const messaging = getMessaging();
