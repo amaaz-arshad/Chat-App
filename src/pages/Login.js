@@ -87,7 +87,16 @@ const Login = () => {
   };
 
   return (
-    <div style={{ paddingLeft: "20px", paddingRight: "20px" }}>
+    <div
+      style={{
+        paddingLeft: "20px",
+        paddingRight: "20px",
+        // position: "relative",
+        // display: "flex",
+        // justifyContent: "center",
+        // alignItems: "center",
+      }}
+    >
       <section>
         <h3>Log into your Account</h3>
         <form className="form" onSubmit={handleSubmit}>

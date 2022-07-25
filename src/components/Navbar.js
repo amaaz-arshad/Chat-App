@@ -11,6 +11,7 @@ const Navbar = () => {
   const { user } = useContext(AuthContext);
 
   const handleSignout = async () => {
+    document.cookie = "uid=; expires=" + new Date(2018, 0, 5).toUTCString();
     await updateDoc(doc(db, "users", auth.currentUser.uid), {
       isOnline: false,
     });

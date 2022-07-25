@@ -1,10 +1,28 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Moment from "react-moment";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import AccordionBody from "react-bootstrap/esm/AccordionBody";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const Message = ({ msg, user1 }) => {
   const scrollRef = useRef();
+  const [displayToggle, setDisplayToggle] = useState(false);
+
+  async function deleteMsg(msgId) {
+    console.log("delete btn was clicked");
+    console.log(msg);
+    const id =
+      msg.from > msg.to ? `${msg.from + msg.to}` : `${msg.to + msg.from}`;
+    await deleteDoc(doc(db, "messages", id, "chat", msgId));
+    // const list = [...dataList];
+    //   list.splice(index, 1);
+    //   setDataList(list);
+    // const descDoc = doc(db, "descriptions", id);
+    // await deleteDoc(descDoc);
+    setDisplayToggle(!displayToggle);
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -15,6 +33,26 @@ const Message = ({ msg, user1 }) => {
       ref={scrollRef}
     >
       <p className={msg.from === user1 ? "me" : "friend"}>
+        <span className="menu">
+          <MoreHorizIcon
+            style={{
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setDisplayToggle(!displayToggle);
+            }}
+          />
+        </span>
+        {/* submenu */}
+        <div
+          className="submenu"
+          style={{ display: displayToggle ? "block" : "none" }}
+          onClick={() => {
+            deleteMsg(msg.id);
+          }}
+        >
+          Delete
+        </div>
         {/* <img src={msg.media} alt={msg.text} />  */}
         {msg.media ? (
           <a target="_blank" className="attachment-link" href={msg.media}>
@@ -26,7 +64,6 @@ const Message = ({ msg, user1 }) => {
                 marginBottom: "2px",
               }}
             >
-              {/* Click here to view attachment */}
               {/* <div> */}
               <InsertDriveFileIcon
                 style={{

@@ -92,3 +92,28 @@ code {
   left: 60px;
   /* bottom: 30px; */
 }
+
+.menu {
+  position: absolute;
+  right: 1px;
+  top: -5px;
+}
+
+.submenu {
+  position: absolute;
+  /* background-color: white; */
+  background-color: black;
+  padding: 7px 10px;
+  margin-top: 5px;
+  border-radius: 3px;
+  right: 5px;
+  /* margin-top: 18px; */
+  /* left: 0;
+  right: 0; */
+  z-index: 1;
+}
+
+.submenu:hover {
+  background-color: rgb(65, 64, 64);
+  cursor: pointer;
+}

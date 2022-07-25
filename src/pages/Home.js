@@ -42,13 +42,12 @@ const Home = () => {
   const [progress, setProgress] = useState(0);
   const [isMsgSending, setIsMsgSending] = useState(false);
   const [isfileAttached, setIsfileAttached] = useState(false);
+  const [tabHasFocus, setTabHasFocus] = useState(true);
   const history = useHistory();
 
   const user1 = auth.currentUser.uid;
   let fileName = "";
   let timer;
-
-  const [tabHasFocus, setTabHasFocus] = useState(true);
 
   useEffect(() => {
     const handleFocus = () => {
@@ -79,6 +78,83 @@ const Home = () => {
       window.removeEventListener("blur", handleBlur);
     };
   }, []);
+
+  // async function logout() {
+  //   await updateDoc(doc(db, "users", auth.currentUser.uid), {
+  //     isOnline: false,
+  //   });
+  //   await signOut(auth);
+  //   history.replace("/login");
+  // }
+
+  // useEffect(() => {
+  //   // document.cookie = `uid=${auth.currentUser.uid};`;
+  //   document.cookie =
+  //     "uid=" +
+  //     auth.currentUser.uid +
+  //     "; expires=" +
+  //     new Date(9999, 0, 5).toUTCString();
+  // }, []);
+
+  // useEffect(() => {
+  //   const handleFocus = () => {
+  //     setTabHasFocus(true);
+  //     console.log("Tab has focus");
+  //     document.cookie =
+  //       "uid=" +
+  //       auth.currentUser.uid +
+  //       "; expires=" +
+  //       new Date(9999, 0, 5).toUTCString();
+  //     // document.cookie = `uid=${auth.currentUser.uid};`;
+  //     // clearTimeout(timer);
+  //   };
+
+  //   const handleBlur = () => {
+  //     setTabHasFocus(false);
+  //     console.log("Tab lost focus");
+  //     let now = new Date();
+  //     now.setTime(now.getTime() + 1 * 3600 * 1000);
+  //     document.cookie = `uid=${
+  //       auth.currentUser.uid
+  //     }; expires=${now.toUTCString()}`;
+  //     // timer = setTimeout(async () => {
+  //     //   console.log("Session expired. Logging out...");
+  //     // }, 3600000);
+  //   };
+
+  //   const handleUnload = async () => {
+  //     setTabHasFocus(false);
+  //     console.log("Tab is closed");
+  //     let now = new Date();
+  //     now.setTime(now.getTime() + 1 * 3600 * 1000);
+  //     document.cookie = `uid=${
+  //       auth.currentUser.uid
+  //     }; expires=${now.toUTCString()}`;
+  //   };
+
+  //   window.addEventListener("focus", handleFocus);
+  //   window.addEventListener("blur", handleBlur);
+  //   window.addEventListener("unload", handleUnload);
+
+  //   return () => {
+  //     window.removeEventListener("focus", handleFocus);
+  //     window.removeEventListener("blur", handleBlur);
+  //     window.removeEventListener("unload", handleUnload);
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     console.log("checking if cookie exists:");
+  //     console.log(document.cookie.indexOf(`uid=${auth.currentUser.uid}`));
+  //     let cookieExists = document.cookie.indexOf(`uid=${auth.currentUser.uid}`);
+  //     if (cookieExists === -1) {
+  //       logout();
+  //       console.log("cookie expired");
+  //     }
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   useEffect(() => {
     const messaging = getMessaging();
@@ -151,7 +227,8 @@ const Home = () => {
     onSnapshot(q, (querySnapshot) => {
       let msgs = [];
       querySnapshot.forEach((doc) => {
-        msgs.push(doc.data());
+        // console.log({ ...doc.data(), id: doc.id });
+        msgs.push({ ...doc.data(), id: doc.id });
       });
       setMsgs(msgs);
     });
