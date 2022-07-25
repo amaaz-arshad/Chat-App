@@ -78,15 +78,13 @@ const Message = ({ msg, user1 }) => {
             </div>
           </a>
         ) : null}
-        {msg.text ? (
-          <span>
-            {msg.text} <br />
-          </span>
-        ) : null}
+        {msg.text ? <span>{msg.text}</span> : null}
 
-        <small>
-          <Moment fromNow>{msg.createdAt.toDate()}</Moment>
-        </small>
+        <div style={{ textAlign: "right" }}>
+          <small>
+            <Moment fromNow>{msg.createdAt.toDate()}</Moment>
+          </small>
+        </div>
       </p>
     </div>
   );
