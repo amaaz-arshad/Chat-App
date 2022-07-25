@@ -8,6 +8,7 @@ const MessageForm = ({
   handleSubmit,
   text,
   setText,
+  img,
   setImg,
   isMsgSending,
   setIsfileAttached,
@@ -57,7 +58,7 @@ const MessageForm = ({
             <CircularProgress color="inherit" size={15} />
           </button>
         ) : (
-          <button className="btn">Send</button>
+          (text || img) && <button className="btn">Send</button>
         )}
       </div>
     </form>

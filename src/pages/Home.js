@@ -280,54 +280,56 @@ const Home = () => {
       setIsMsgSending(false);
     }
 
-    await addDoc(collection(db, "messages", id, "chat"), {
-      text,
-      from: user1,
-      to: user2,
-      createdAt: Timestamp.fromDate(new Date()),
-      media: url || "",
-      fileName,
-    });
-
-    await setDoc(doc(db, "lastMsg", id), {
-      text,
-      from: user1,
-      to: user2,
-      createdAt: Timestamp.fromDate(new Date()),
-      media: url || "",
-      fileName,
-      unread: true,
-    });
-
-    let body = {
-      to: chat.token,
-      notification: {
-        title: `Message from ${auth.currentUser.displayName}`,
-        body: text,
-        icon: url,
-      },
-    };
-    console.log(body);
-
-    let options = {
-      method: "POST",
-      headers: new Headers({
-        Authorization:
-          "key=AAAAG-WmdaM:APA91bFs8ZvZg9vUQTZgC5N601T6PbwL4s0hfxdTWViQ0Wq6sdB0LV-UTuEYjFbPzL3AmP1Zxvqchq2NtfQgKcdzzFzD6vCuwoRi_aZpn5mjTbWpnOb69zhDg6zuxlxK_c1K_bgb3CPN",
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      }),
-      body: JSON.stringify(body),
-    };
-
-    fetch("https://fcm.googleapis.com/fcm/send", options)
-      .then((res) => {
-        console.log("SENT");
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log("Error:", err);
+    if (text || img) {
+      await addDoc(collection(db, "messages", id, "chat"), {
+        text,
+        from: user1,
+        to: user2,
+        createdAt: Timestamp.fromDate(new Date()),
+        media: url || "",
+        fileName,
       });
+
+      await setDoc(doc(db, "lastMsg", id), {
+        text,
+        from: user1,
+        to: user2,
+        createdAt: Timestamp.fromDate(new Date()),
+        media: url || "",
+        fileName,
+        unread: true,
+      });
+
+      let body = {
+        to: chat.token,
+        notification: {
+          title: `Message from ${auth.currentUser.displayName}`,
+          body: text,
+          icon: url,
+        },
+      };
+      console.log(body);
+
+      let options = {
+        method: "POST",
+        headers: new Headers({
+          Authorization:
+            "key=AAAAG-WmdaM:APA91bFs8ZvZg9vUQTZgC5N601T6PbwL4s0hfxdTWViQ0Wq6sdB0LV-UTuEYjFbPzL3AmP1Zxvqchq2NtfQgKcdzzFzD6vCuwoRi_aZpn5mjTbWpnOb69zhDg6zuxlxK_c1K_bgb3CPN",
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify(body),
+      };
+
+      fetch("https://fcm.googleapis.com/fcm/send", options)
+        .then((res) => {
+          console.log("SENT");
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log("Error:", err);
+        });
+    }
   };
 
   return (
@@ -366,6 +368,7 @@ const Home = () => {
               handleSubmit={handleSubmit}
               text={text}
               setText={setText}
+              img={img}
               setImg={setImg}
               isMsgSending={isMsgSending}
               setIsfileAttached={setIsfileAttached}
